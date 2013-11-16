@@ -1,6 +1,6 @@
 package main;
 
-import arff.ProcessFile;
+import arff.Data;
 
 public class Bayes {
 
@@ -10,7 +10,7 @@ public class Bayes {
 			System.exit(1);
 		}
 		
-		ProcessFile data = new ProcessFile(args[0]);
+		Data data = new Data(args[0]);
 
 		if(args[2].equals("n")){
 			// Create naive bayes network

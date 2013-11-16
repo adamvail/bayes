@@ -6,12 +6,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class ProcessFile {
+public class Data {
 
 	ArrayList<Instance> data = new ArrayList<Instance>();
 	ArrayList<Feature> features = new ArrayList<Feature>();
 	
-	public ProcessFile(String filename){
+	public Data(String filename){
 		parseFile(filename);
 		printData();
 	}
@@ -76,6 +76,14 @@ public class ProcessFile {
 		} catch (IOException e) {
 			System.out.println("Could not close input file");
 		}
+	}
+	
+	public ArrayList<Instance> getData(){
+		return data;
+	}
+	
+	public ArrayList<Feature> getFeatures(){
+		return features;
 	}
 	
 	public void printData(){

@@ -16,7 +16,7 @@ public class Feature {
 		return name;
 	}
 	
-	public ArrayList<String> getValue(){
+	public ArrayList<String> getValues(){
 		return values;
 	}
 }
