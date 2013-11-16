@@ -34,12 +34,12 @@ public class NaiveUnit {
 			String fVal = feature.getValues().get(i);
 			for(int k = 0; k < classificationFeature.getValues().size(); k++){
 				String cVal = classificationFeature.getValues().get(k);
-				cpd[i][k] = getProbability(fVal, cVal);
+				cpd[i][k] = calculateProbability(fVal, cVal);
 			}
 		}
 	}
 	
-	private double getProbability(String featureValue, String givenValue){
+	private double calculateProbability(String featureValue, String givenValue){
 		int occurances = 0;
 		int total = 0;
 		
@@ -53,6 +53,10 @@ public class NaiveUnit {
 		}
 		
 		return (occurances + 1.0) / (total + 1.0);
+	}
+	
+	public double getProbability(String fVal, String cVal){
+		return cpd[feature.getValues().indexOf(fVal)][classificationFeature.getValues().indexOf(cVal)];
 	}
 	
 	public void setParent(NaiveRoot parent){

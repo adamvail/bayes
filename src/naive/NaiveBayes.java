@@ -48,13 +48,34 @@ public class NaiveBayes {
 
 	private void testNetwork(){
 		
+		double correct = 1;
+		
 		for(Instance i : test.getData()){
-			
+			String prediction = classify(i);
+			if(prediction.equals(i.getValue(train.getFeatures().get(train.getFeatures().size() - 1)))){
+				correct++;
+			}
 		}
+		System.out.println(correct + " / " + train.getData().size() + " : " + (correct / train.getData().size()));
 	}
 	
 	private String classify(Instance i){
+		Feature classificationFeature = train.getFeatures().get(train.getFeatures().size() - 1);
+		String classification = "";
+		double highestProb = 0.0;
 		
-		return null;
+		for(String cVal : classificationFeature.getValues()){
+			double prob = root.getProbability(cVal);
+			for(NaiveUnit u : root.getChildren()){
+				prob = prob * u.getProbability(i.getValue(u.getName()), cVal);
+			}
+			
+			if(prob > highestProb){
+				highestProb = prob;
+				classification = cVal;
+			}
+		}
+		
+		return classification;
 	}
 }

@@ -51,6 +51,15 @@ public class NaiveRoot {
 		return children;
 	}
 	
+	public NaiveUnit getChild(Feature feature){
+		for(NaiveUnit u : children){
+			if(u.getName().equals(feature.getName())){
+				return u;
+			}
+		}
+		return null;
+	}
+	
 	public String getName(){
 		return feature.getName();
 	}
