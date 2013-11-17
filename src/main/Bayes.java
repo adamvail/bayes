@@ -1,5 +1,6 @@
 package main;
 
+import naive.NaiveBayes;
 import arff.Data;
 
 public class Bayes {
@@ -10,10 +11,13 @@ public class Bayes {
 			System.exit(1);
 		}
 		
-		Data data = new Data(args[0]);
+		Data train = new Data(args[0]);
+		Data test = new Data(args[1]);
 
 		if(args[2].equals("n")){
 			// Create naive bayes network
+			NaiveBayes nb = new NaiveBayes(train, test);
+			//nb.printCPDs();
 		}
 		else if(args[2].equals("t")){
 			// Create TAN network

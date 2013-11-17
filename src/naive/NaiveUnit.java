@@ -22,7 +22,7 @@ public class NaiveUnit {
 		classificationFeature = data.getFeatures().get(data.getFeatures().size() - 1);
 		
 		// sanity check that I'm grabbing the right feature
-		System.out.println("Classification feature: " + classificationFeature.getName());
+		//System.out.println("Classification feature: " + classificationFeature.getName());
 		
 		cpd = new double[feature.getValues().size()][classificationFeature.getValues().size()];
 		
@@ -52,7 +52,9 @@ public class NaiveUnit {
 			}
 		}
 		
-		return (occurances + 1.0) / (total + 1.0);
+		// Here laplace pseudocount for denominator takes the possible values that
+		// the feature could've taken on
+		return (occurances + 1.0) / (total + feature.getValues().size());
 	}
 	
 	public double getProbability(String fVal, String cVal){
@@ -69,5 +71,17 @@ public class NaiveUnit {
 	
 	public NaiveRoot getParent(){
 		return parent;
+	}
+	
+	public void printCPD(){
+		System.out.println(getName());
+		// iterate the rows
+		for(int i = 0; i < cpd.length; i++){
+			// iterate the columns
+			for(int k = 0; k < cpd[0].length; k++){
+				System.out.println(feature.getValues().get(i) + " | " + classificationFeature.getValues().get(k) + " : " + cpd[i][k]);
+			}
+		}
+		System.out.println();
 	}
 }

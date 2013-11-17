@@ -13,7 +13,7 @@ public class Data {
 	
 	public Data(String filename){
 		parseFile(filename);
-		printData();
+		//printData();
 	}
 	
 	public void parseFile(String filename){
@@ -47,6 +47,14 @@ public class Data {
 					// Then this is an attribute
 					
 					String name = line.split("[ ]")[1].trim();
+					if(name.startsWith("'")){
+						name = name.substring(1);
+					}
+					
+					if(name.endsWith("'")){
+						name = name.substring(0, name.length() - 1);
+					}
+					
 					String[] vals = line.substring(line.indexOf("{") + 1, line.indexOf("}")).split("[,]");
 					ArrayList<String> values = new ArrayList<String>();
 					for(String s : vals){

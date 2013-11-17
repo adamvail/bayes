@@ -28,7 +28,7 @@ public class NaiveRoot {
 				}
 			}
 			// use Laplace pseudocounts to make sure no prob is ever zero
-			double probability = (occurances + 1.0) / (data.getData().size() + 1.0);
+			double probability = (occurances + 1.0) / (data.getData().size() + feature.getValues().size());
 			
 			// create the hashmap
 			probabilities.put(val, probability);
@@ -62,6 +62,16 @@ public class NaiveRoot {
 	
 	public String getName(){
 		return feature.getName();
+	}
+	
+	public void printCPD(){
+		System.out.println(getName());
+		
+		for(String val : feature.getValues()){
+			System.out.println(val + ": " + probabilities.get(val));
+		}
+		
+		System.out.println();
 	}
 	
 }
