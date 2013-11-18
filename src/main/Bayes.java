@@ -1,6 +1,7 @@
 package main;
 
 import naive.NaiveBayes;
+import tan.Tan;
 import arff.Data;
 
 public class Bayes {
@@ -21,6 +22,8 @@ public class Bayes {
 		}
 		else if(args[2].equals("t")){
 			// Create TAN network
+			Tan tan = new Tan(train, test);
+			
 		}
 		else {
 			System.out.println("Usage: ./bayes <train> <test> <n|t>");

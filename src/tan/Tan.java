@@ -1,6 +1,6 @@
 package tan;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 
 import arff.Data;
 import arff.Feature;
@@ -10,14 +10,52 @@ public class Tan {
 
 	Data train;
 	Data test;
+	HashSet<Edge> edges = new HashSet<Edge>();
 	
 	public Tan(Data train, Data test){
 		this.train = train;
 		this.test = test;
+		createTanNetwork();
 	}
 	
 	private void createTanNetwork(){
+		calculateEdgeWeights();
+		printEdges();
+	}
+	
+	
+	private void printEdges(){
 		
+		for(int i = 0; i < train.getFeatures().size(); i++){
+			System.out.print(train.getFeatures().get(i).getName() + " ");
+		}
+		System.out.println();
+		
+		for(int i = 0; i < train.getFeatures().size() - 1; i++){
+			Feature ep1 = train.getFeatures().get(i);
+			for(int k = 0; k < train.getFeatures().size() - 1; k++){
+				Feature ep2 = train.getFeatures().get(k);
+				
+				if(ep1.getName().equals(ep2.getName())){
+					System.out.print(1 + " ");
+				}
+				else {
+					System.out.print(getEdge(ep1, ep2).getCMI() + " ");
+				}
+			}
+			System.out.println();
+		}
+	}
+	
+	private Edge getEdge(Feature ep1, Feature ep2){
+		
+		for(Edge e : edges){
+			if(e.isEdgeBetweenF1F2(ep1, ep2)){
+				return e;
+			}
+		}
+		System.out.println("\n" + ep1.getName() + " -> " + ep2.getName());
+		return null;
 	}
 	
 	private void calculateEdgeWeights(){
@@ -25,21 +63,13 @@ public class Tan {
 		// cycle through every feature (except the class feature)
 		for(int i = 0; i < train.getFeatures().size() - 1; i++){
 			Feature f1 = train.getFeatures().get(i);
-			if(f1.getName().equals("class")){
-				System.out.println("Didn't cycle through features correctly");
-				System.exit(1);
-			}
+			
 			for(int k = i + 1; k < train.getFeatures().size() - 1; k++){
 				Feature f2 = train.getFeatures().get(k);
 				
-				if(f2.getName().equals("class")){
-					System.out.println("Didn't cycle through features correctly");
-					System.exit(1);
-				}
-				
 				// have two features, calculate cmi between the two
 				double cmi = conditionalMutualInformation(f1, f2);
-				// TODO put the cmi's somehwere useful
+				edges.add(new Edge(f1, f2, cmi));				
 			}
 		}
 		
@@ -53,7 +83,12 @@ public class Tan {
 		for(String f1Val : f1.getValues()){
 			for(String f2Val : f2.getValues()){
 				for(String cVal : classification.getValues()){
-					cmi += calculateProbX(f1, f1Val, f2, f2Val, classification, cVal);
+					double probX1X2Y = calculateProbX(f1, f1Val, f2, f2Val, classification, cVal);
+					double probX1X2GivenY = calculateProbXGivenY(f1, f1Val, f2, f2Val, classification, cVal);
+					double probX1GivenY = calculateProbXGivenY(f1, f1Val, classification, cVal);
+					double probX2GivenY = calculateProbXGivenY(f2, f2Val, classification, cVal);
+					
+					cmi += probX1X2Y * Math.log10(probX1X2GivenY / (probX1GivenY * probX2GivenY));
 				}
 			}
 		}
