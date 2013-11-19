@@ -9,7 +9,10 @@ import arff.Instance;
 public class TanUnit {
 	Feature feature;
 	ArrayList<Double> prob;
-	ArrayList<TanUnit> parents;
+	ArrayList<TanUnit> parents = new ArrayList<TanUnit>();
+	ArrayList<TanUnit> children = new ArrayList<TanUnit>();
+	ArrayList<TanUnit> connections = new ArrayList<TanUnit>();
+	
 	double[][] cpd;
 	Feature classificationFeature;
 	Data data;
@@ -25,6 +28,14 @@ public class TanUnit {
 		cpd = new double[feature.getValues().size()][classificationFeature.getValues().size()];
 		
 		populateCPD();
+	}
+	
+	public void addConnection(TanUnit connection){
+		this.connections.add(connection);
+	}
+	
+	public ArrayList<TanUnit> getConnections(){
+		return connections;
 	}
 	
 	private void populateCPD(){
@@ -69,6 +80,14 @@ public class TanUnit {
 	
 	public ArrayList<TanUnit> getParents(){
 		return parents;
+	}
+	
+	public void addChild(TanUnit child){
+		this.children.add(child);
+	}
+	
+	public ArrayList<TanUnit> getChildren(){
+		return children;
 	}
 	
 	public void printCPD(){
