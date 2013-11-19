@@ -14,6 +14,7 @@ public class Tan {
 	Data test;
 	HashSet<Edge> edges = new HashSet<Edge>();
 	double[][] edge_weights = {{1,5,3,4}, {5,1,4,2}, {3,4,1,6}, {4,2,6,1}};
+	TanUnit root = null;
 	
 	public Tan(Data train, Data test){
 		this.train = train;
@@ -29,8 +30,22 @@ public class Tan {
 		
 		//printWeights();
 		//System.out.println("\n");
-		TanUnit root = determineStructure();
+		root = determineStructure();
 		printNetwork(root);
+		
+		TanUnit classification = new TanUnit(train.getFeatures().get(train.getFeatures().size() - 1), null);
+		addClassificationParent(root, classification);
+		root = classification;
+	}
+	
+	private void addClassificationParent(TanUnit node, TanUnit classification){
+		
+		node.addParent(classification);
+		classification.addChild(node);
+		
+		for(TanUnit u : node.getChildren()){
+			addClassificationParent(u, classification);
+		}
 	}
 	
 	public void printNetwork(TanUnit node){

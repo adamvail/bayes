@@ -28,6 +28,11 @@ public class Data {
 				// trim whitespace
 				line = line.trim();
 				
+				// check for comments
+				if(line.startsWith("%")){
+					continue;
+				}
+				
 				// check to see if we're reading data yet
 				if(readingData){
 					String[] vals = line.split("[,]");

@@ -25,9 +25,12 @@ public class TanUnit {
 		// sanity check that I'm grabbing the right feature
 		//System.out.println("Classification feature: " + classificationFeature.getName());
 		
-		cpd = new double[feature.getValues().size()][classificationFeature.getValues().size()];
+		// data is null for classification root for the network
+		if(data != null){
+			cpd = new double[feature.getValues().size()][classificationFeature.getValues().size()];
 		
-		populateCPD();
+			populateCPD();
+		}
 	}
 	
 	public void addConnection(TanUnit connection){
