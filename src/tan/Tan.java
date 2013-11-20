@@ -15,6 +15,7 @@ public class Tan {
 	HashSet<Edge> edges = new HashSet<Edge>();
 	double[][] edge_weights; // = {{1,5,3,4}, {5,1,4,2}, {3,4,1,6}, {4,2,6,1}};
 	TanUnit root = null;
+	ArrayList<TanUnit> allNodes = new ArrayList<TanUnit>();
 	
 	public Tan(Data train, Data test){
 		this.train = train;
@@ -36,9 +37,11 @@ public class Tan {
 		//printNetwork(root);
 		
 		TanUnit classification = new TanUnit(train.getFeatures().get(train.getFeatures().size() - 1), train);
+		allNodes.add(classification);
 		addClassificationParent(root, classification);
 		root = classification;
 		
+		printNetwork();
 	}
 	
 	private void testNetwork(){
@@ -92,12 +95,25 @@ public class Tan {
 	}
 	
 	public void printNetwork(TanUnit node){
-		//System.out.println(root.getName());
+		System.out.print(root.getName());
 		for(TanUnit u : node.getChildren()){
 			System.out.println(u.getName() + " " + u.getParents().get(0).getName());
 		}
 		for(TanUnit u : node.getChildren()){
 			printNetwork(u);
+		}
+	}
+	
+	public void printNetwork(){
+		for(TanUnit u : allNodes){
+			if(u.getName().equals("class")){
+				continue;
+			}
+			System.out.print(u.getName() + " ");
+			for(TanUnit p : u.getParents()){
+				System.out.print(p.getName() + " ");
+			}
+			System.out.println();
 		}
 	}
 	
@@ -174,12 +190,19 @@ public class Tan {
 		for(String f1Val : f1.getValues()){
 			for(String f2Val : f2.getValues()){
 				for(String cVal : classification.getValues()){
+					
+					if(f1.equals(f2) && !f1Val.equals(f2Val)){
+						// It is impossible for the same feature to
+						// have different values at the same time
+						continue;
+					}
+					
 					double probX1X2Y = calculateProbX(f1, f1Val, f2, f2Val, classification, cVal);
 					double probX1X2GivenY = calculateProbXGivenY(f1, f1Val, f2, f2Val, classification, cVal);
 					double probX1GivenY = calculateProbXGivenY(f1, f1Val, classification, cVal);
 					double probX2GivenY = calculateProbXGivenY(f2, f2Val, classification, cVal);
 					
-					cmi += probX1X2Y * Math.log10(probX1X2GivenY / (probX1GivenY * probX2GivenY));
+					cmi += probX1X2Y * Math.log(probX1X2GivenY / (probX1GivenY * probX2GivenY));
 				}
 			}
 		}
@@ -204,12 +227,26 @@ public class Tan {
 		
 		// Laplace estimates need to be normalized over all possible values these three features
 		// could've taken on
+		
+		if(f1.equals(f2)){
+			int f1Size = f1.getValues().size();
+			int classSize = classification.getValues().size();
+			
+			double test= (occurances + 1.0) / (total + (f1Size * 
+					classSize));
+			return test;
+		}
+		
 		return (occurances + 1.0) / (total + (f1.getValues().size() * f2.getValues().size() * 
 				classification.getValues().size()));
 	}
 	
 	private double calculateProbXGivenY(Feature f1, String f1Val, Feature f2, String f2Val,
 			Feature classification, String cVal){
+		
+		if(f1.equals(f2)){
+			return calculateProbXGivenY(f1, f1Val, classification, cVal);
+		}
 		
 		int occurances = 0;
 		int total = 0;
@@ -278,6 +315,7 @@ public class Tan {
 		// put the first feature in the vNew set
 		vNew.add(0);
 		nodes[0] = new TanUnit(train.getFeatures().get(0), train);
+		allNodes.add(nodes[0]);
 		
 		while(vNew.size() < train.getFeatures().size() - 1){
 		
@@ -322,18 +360,20 @@ public class Tan {
 			vNew.add(endpointOutsideGraph);
 			
 			nodes[endpointOutsideGraph] = new TanUnit(train.getFeatures().get(endpointOutsideGraph), train);
+			allNodes.add(nodes[endpointOutsideGraph]);
 			
 			// Add a new connection between these features to be used later when determining
 			// edge direction.
 			nodes[sourceInGraph].addConnection(nodes[endpointOutsideGraph]);
 			nodes[endpointOutsideGraph].addConnection(nodes[sourceInGraph]);
 			
-			System.out.println(train.getFeatures().get(sourceInGraph).getName() + " -> " + 
-					train.getFeatures().get(endpointOutsideGraph).getName() + " : " + highestWeight);
+		//	System.out.println(train.getFeatures().get(sourceInGraph).getName() + " -> " + 
+		//			train.getFeatures().get(endpointOutsideGraph).getName() + " : " + highestWeight);
 			
 		}
 		// only return the root since the rest of the graph can be created through the connections
 		// in each node.
+		
 		return nodes[0];
 	}
 }
