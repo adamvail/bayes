@@ -165,6 +165,10 @@ public class Tan {
 	private double conditionalMutualInformation(Feature f1, Feature f2){
 		Feature classification = train.getFeatures().get(train.getFeatures().size() - 1);
 		
+		if(f1.equals(f2)){
+			return 1.0;
+		}
+		
 		double cmi = 0.0;
 		
 		for(String f1Val : f1.getValues()){

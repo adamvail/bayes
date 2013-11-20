@@ -19,4 +19,12 @@ public class Feature {
 	public ArrayList<String> getValues(){
 		return values;
 	}
+	
+	@Override
+	public boolean equals(Object o){
+		if(((Feature)o).getName().equals(name)){
+			return true;
+		}
+		return false;
+	}
 }
