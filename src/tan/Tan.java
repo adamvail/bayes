@@ -3,7 +3,7 @@ package tan;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import naive.NaiveUnit;
+import main.Prediction;
 import arff.Data;
 import arff.Feature;
 import arff.Instance;
@@ -13,29 +13,72 @@ public class Tan {
 	Data train;
 	Data test;
 	HashSet<Edge> edges = new HashSet<Edge>();
-	double[][] edge_weights = {{1,5,3,4}, {5,1,4,2}, {3,4,1,6}, {4,2,6,1}};
+	double[][] edge_weights; // = {{1,5,3,4}, {5,1,4,2}, {3,4,1,6}, {4,2,6,1}};
 	TanUnit root = null;
 	
 	public Tan(Data train, Data test){
 		this.train = train;
 		this.test = test;
 		
-		//edge_weights = new double[train.getFeatures().size() - 1][train.getFeatures().size() - 1];
+		edge_weights = new double[train.getFeatures().size() - 1][train.getFeatures().size() - 1];
 		
 		createTanNetwork();
+		//testNetwork();
 	}
 	
 	private void createTanNetwork(){
-		//calculateEdgeWeights();
+		calculateEdgeWeights();
 		
-		//printWeights();
+		printWeights();
 		//System.out.println("\n");
-		root = determineStructure();
-		printNetwork(root);
 		
-		TanUnit classification = new TanUnit(train.getFeatures().get(train.getFeatures().size() - 1), null);
+		root = determineStructure();
+		//printNetwork(root);
+		
+		TanUnit classification = new TanUnit(train.getFeatures().get(train.getFeatures().size() - 1), train);
 		addClassificationParent(root, classification);
 		root = classification;
+		
+	}
+	
+	private void testNetwork(){
+		int correct = 0;
+
+		for(Instance i : test.getData()){
+			Prediction prediction = classify(i);
+			String actual = i.getValue(test.getFeatures().get(test.getFeatures().size() - 1));
+			System.out.println(prediction.getPrediction() + " " + actual + " " + prediction.getProbability());
+			if(prediction.getPrediction().equals(actual)){
+				correct++;
+			}
+		}
+
+		System.out.println("\n" + correct);
+	}
+	
+	private Prediction classify(Instance i){
+		Feature classificationFeature = train.getFeatures().get(train.getFeatures().size() - 1);
+		String classification = "";
+		double highestProb = 0.0;
+		double normalization = 0.0;
+		
+		for(String cVal : classificationFeature.getValues()){
+			// pass in null instance since the instance doesn't matter for
+			// the prob of the different values of the classification root node
+			double prob = root.getProbability(null, cVal);
+			for(TanUnit u : root.getChildren()){
+				prob = prob * u.getProbability(i, cVal);
+			}
+			
+			normalization += prob;
+			
+			if(prob > highestProb){
+				highestProb = prob;
+				classification = cVal;
+			}
+		}
+		
+		return new Prediction(classification, highestProb / normalization);
 	}
 	
 	private void addClassificationParent(TanUnit node, TanUnit classification){
@@ -157,8 +200,8 @@ public class Tan {
 		
 		// Laplace estimates need to be normalized over all possible values these three features
 		// could've taken on
-		return (occurances + 1.0) / (total + f1.getValues().size() + f2.getValues().size() + 
-				classification.getValues().size());
+		return (occurances + 1.0) / (total + (f1.getValues().size() * f2.getValues().size() * 
+				classification.getValues().size()));
 	}
 	
 	private double calculateProbXGivenY(Feature f1, String f1Val, Feature f2, String f2Val,
@@ -176,7 +219,7 @@ public class Tan {
 			}
 		}
 		
-		return (occurances + 1.0) / (total + f1.getValues().size() + f2.getValues().size());
+		return (occurances + 1.0) / (total + (f1.getValues().size() * f2.getValues().size()));
 		
 	}
 	

@@ -30,6 +30,7 @@ public class Data {
 				
 				// check for comments
 				if(line.startsWith("%")){
+					line = reader.readLine();
 					continue;
 				}
 				

@@ -13,7 +13,6 @@ public class TanUnit {
 	ArrayList<TanUnit> children = new ArrayList<TanUnit>();
 	ArrayList<TanUnit> connections = new ArrayList<TanUnit>();
 	
-	double[][] cpd;
 	Feature classificationFeature;
 	Data data;
 	
@@ -24,15 +23,8 @@ public class TanUnit {
 		
 		// sanity check that I'm grabbing the right feature
 		//System.out.println("Classification feature: " + classificationFeature.getName());
-		
-		// data is null for classification root for the network
-		if(data != null){
-			cpd = new double[feature.getValues().size()][classificationFeature.getValues().size()];
-		
-			populateCPD();
-		}
 	}
-	
+		
 	public void addConnection(TanUnit connection){
 		this.connections.add(connection);
 	}
@@ -41,27 +33,64 @@ public class TanUnit {
 		return connections;
 	}
 	
-	private void populateCPD(){
-		for(int i = 0; i < feature.getValues().size(); i++){
-			String fVal = feature.getValues().get(i);
-			for(int k = 0; k < classificationFeature.getValues().size(); k++){
-				String cVal = classificationFeature.getValues().get(k);
-				cpd[i][k] = calculateProbability(fVal, cVal);
+	
+	private double rootProbability(String cVal){
+		int occurances = 0;
+		for(Instance i : data.getData()){
+			if(i.getValue(feature).equals(cVal)){
+				occurances++;
 			}
 		}
+		// use Laplace pseudocounts to make sure no prob is ever zero
+		return (occurances + 1.0) / (data.getData().size() + feature.getValues().size());
 	}
 	
-	private double calculateProbability(String featureValue, String givenValue){
+	public double getProbability(Instance i, String cVal){
+		if(feature.getName().equals("class")){
+			return rootProbability(cVal);
+		}
+		
+		ArrayList<String> parentValues = new ArrayList<String>();
+		String fValue = i.getValue(feature);
+		
+		for(int k = 0; k < parents.size(); k++){
+			TanUnit parent = parents.get(k); 
+			if(parent.getName().equals(classificationFeature.getName())){
+				parentValues.add(cVal);
+			}
+			
+			parentValues.add(i.getValue(parent.getName()));
+		}
+		
+		return calculateProbability(fValue, parentValues);
+	}
+	
+	private double calculateProbability(String fValue, ArrayList<String> parentValues){
 		int occurances = 0;
 		int total = 0;
 		
 		for(Instance i : data.getData()){
-			if(i.getValue(classificationFeature).equals(givenValue)){
+			
+			boolean match = true;
+			
+			for(int k = 0; k < parentValues.size(); k++){
+				if(!i.getValue(data.getFeatures().get(k)).equals(parentValues.get(k))){
+					match = false;
+					break;
+				}
+			}
+			
+			if(match){
+				// This instance has all parent values
 				total++;
-				if(i.getValue(feature).equals(featureValue)){
+				// check if this instance has this feature's value
+				if(i.getValue(feature).equals(fValue)){
 					occurances++;
 				}
 			}
+			
+			// TODO figure out laplace normalization here
+			return (occurances + 1.0) / (total);
 		}
 		
 		// Here laplace pseudocount for denominator takes the possible values that
@@ -69,9 +98,9 @@ public class TanUnit {
 		return (occurances + 1.0) / (total + feature.getValues().size());
 	}
 	
-	public double getProbability(String fVal, String cVal){
-		return cpd[feature.getValues().indexOf(fVal)][classificationFeature.getValues().indexOf(cVal)];
-	}
+//	public double getProbability(String fVal, String cVal){
+//		return cpd[feature.getValues().indexOf(fVal)][classificationFeature.getValues().indexOf(cVal)];
+//	}
 	
 	public void addParent(TanUnit parent){
 		this.parents.add(parent);
@@ -91,17 +120,5 @@ public class TanUnit {
 	
 	public ArrayList<TanUnit> getChildren(){
 		return children;
-	}
-	
-	public void printCPD(){
-		System.out.println(getName());
-		// iterate the rows
-		for(int i = 0; i < cpd.length; i++){
-			// iterate the columns
-			for(int k = 0; k < cpd[0].length; k++){
-				System.out.println(feature.getValues().get(i) + " | " + classificationFeature.getValues().get(k) + " : " + cpd[i][k]);
-			}
-		}
-		System.out.println();
 	}
 }
