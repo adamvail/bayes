@@ -24,7 +24,14 @@ public class Tan {
 		edge_weights = new double[train.getFeatures().size() - 1][train.getFeatures().size() - 1];
 		
 		createTanNetwork();
-		//testNetwork();
+//		testNetwork();
+		//printCPDs();
+	}
+	
+	private void computeCPDs(){
+		for(TanUnit u : allNodes){
+			u.computeProbability();
+		}
 	}
 	
 	private void createTanNetwork(){
@@ -40,6 +47,8 @@ public class Tan {
 		allNodes.add(classification);
 		addClassificationParent(root, classification);
 		root = classification;
+		
+		computeCPDs();
 		
 		printNetwork();
 	}
@@ -69,11 +78,15 @@ public class Tan {
 			// pass in null instance since the instance doesn't matter for
 			// the prob of the different values of the classification root node
 			double prob = root.getProbability(null, cVal);
+			// TODO just query for the probability value
 			for(TanUnit u : root.getChildren()){
 				prob = prob * u.getProbability(i, cVal);
+				u.computeProbability();
 			}
 			
 			normalization += prob;
+		
+			System.out.println();
 			
 			if(prob > highestProb){
 				highestProb = prob;
