@@ -229,7 +229,7 @@ public class Tan {
 					double probX1GivenY = calculateProbXGivenY(f1, f1Val, classification, cVal);
 					double probX2GivenY = calculateProbXGivenY(f2, f2Val, classification, cVal);
 					
-					cmi += probX1X2Y * Math.log(probX1X2GivenY / (probX1GivenY * probX2GivenY));
+					cmi += probX1X2Y * (Math.log(probX1X2GivenY / (probX1GivenY * probX2GivenY)) / Math.log(2));
 				}
 			}
 		}
