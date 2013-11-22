@@ -1,6 +1,8 @@
 package tan;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 
 import arff.Data;
 import arff.Feature;
@@ -12,6 +14,7 @@ public class TanUnit {
 	ArrayList<TanUnit> parents = new ArrayList<TanUnit>();
 	ArrayList<TanUnit> children = new ArrayList<TanUnit>();
 	ArrayList<TanUnit> connections = new ArrayList<TanUnit>();
+	HashSet<Probability> probabilities = new HashSet<Probability>();
 	
 	Feature classificationFeature;
 	Data data;
@@ -50,19 +53,54 @@ public class TanUnit {
 			return rootProbability(cVal);
 		}
 		
-		ArrayList<String> parentValues = new ArrayList<String>();
-		String fValue = i.getValue(feature);
+		Iterator<Probability> pIter = probabilities.iterator();
 		
-		for(int k = 0; k < parents.size(); k++){
-			TanUnit parent = parents.get(k); 
-			if(parent.getName().equals(classificationFeature.getName())){
-				parentValues.add(cVal);
+		while(pIter.hasNext()){
+			Probability p = pIter.next();
+			
+			// Check to see if this feature value is
+			// used in this probability
+			String fVal = i.getValue(feature);
+			if(!p.fVal.equals(fVal)){
+				continue;
 			}
 			
-			parentValues.add(i.getValue(parent.getName()));
+			int classIndex  = -1;
+			for(int k = 0; k < parents.size(); k++){
+				if(parents.get(k).feature.equals(classificationFeature)){
+					classIndex = k;
+					break;
+				}
+			}
+			
+			// check the classification is the same
+			if(!p.getParentValues().get(classIndex).equals(cVal)){
+				continue;
+			}
+			
+			boolean allParentValues = true;
+			for(int j = 0; j < p.parents.size(); j++){
+				TanUnit parent = p.parents.get(j);
+				if(parent.feature.equals(classificationFeature)){
+					continue;
+				}
+				
+				if(!i.getValue(parent.feature).equals(p.getParentValues().get(j))){
+					allParentValues = false;
+					break;
+				}
+			}
+			
+			if(!allParentValues){
+				continue;
+			}
+			
+			// If you've made it here then p is the probability
+			return p.getProbability();
+			
 		}
 		
-		return calculateProbability(fValue, parentValues);
+		return -1;
 	}
 	
 	public ArrayList<String> getFeatureValues(){
@@ -70,13 +108,9 @@ public class TanUnit {
 	}
 	
 	public void computeProbability(){
-		System.out.println("\nComputing Feature: " + feature.getName());
+		//System.out.println("\nComputing Feature: " + feature.getName());
 		if(feature.getName().equals("class")){
-			for(int l = 0; l < feature.getValues().size(); l++){
-				String cVal = feature.getValues().get(l);
-				System.out.println("Pr(" + data.getFeatures().indexOf(feature) + 
-						"=" + l + ") = " + rootProbability(cVal));
-			}
+			// this case is handled in getProbability()
 			return;
 		}
 		
@@ -95,7 +129,8 @@ public class TanUnit {
 			
 			for(int k = 0; k < feature.getValues().size(); k++){
 				String fVal = feature.getValues().get(k);
-				double probability = calculateProbability(fVal, parentValues);
+				probabilities.add(calculateProbability(fVal, parentValues));
+				/*
 				System.out.print("P(" + data.getFeatures().indexOf(feature) + "=" +
 						k + " | ");
 				for(int j = 0; j < pointers.size(); j++){
@@ -106,6 +141,7 @@ public class TanUnit {
 					}
 				}
 				System.out.println(") = " + probability);
+				*/
 			}
 			
 			int parentPosition = parents.size() - 1;
@@ -133,7 +169,7 @@ public class TanUnit {
 		
 	}
 	
-	private double calculateProbability(String fValue, ArrayList<String> parentValues){
+	private Probability calculateProbability(String fValue, ArrayList<String> parentValues){
 		int occurances = 0;
 		int total = 0;
 		
@@ -159,7 +195,8 @@ public class TanUnit {
 		}	
 		// Here laplace pseudocount for denominator takes the possible values that
 		// the feature could've taken on
-		return (occurances + 1.0) / (total + feature.getValues().size());
+		double prob = (occurances + 1.0) / (total + feature.getValues().size());
+		return new Probability(fValue, parentValues, parents, prob);
 	}
 	
 //	public double getProbability(String fVal, String cVal){
