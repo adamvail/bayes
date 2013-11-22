@@ -10,6 +10,7 @@ public class NaiveBayes {
 	Data train;
 	Data test;
 	NaiveRoot root;
+	int numCorrect;
 	
 	public NaiveBayes(Data train, Data test){
 		this.train = train;
@@ -31,6 +32,14 @@ public class NaiveBayes {
 		for(NaiveUnit u : root.getChildren()){
 			System.out.println(u.getName() + " " + u.getParent().getName());
 		}
+	}
+	
+	public double getPercentageCorrect(){
+		return ((numCorrect + 0.0) / test.getData().size()) * 100;
+	}
+	
+	public int getNumCorrect(){
+		return numCorrect;
 	}
 	
 	public void printCPDs(){
@@ -77,6 +86,7 @@ public class NaiveBayes {
 		}
 		
 		System.out.println("\n" + correct);
+		numCorrect = correct;
 		//System.out.println(correct + " / " + train.getData().size() + " : " + (correct / train.getData().size()));
 	}
 	

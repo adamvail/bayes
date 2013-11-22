@@ -13,9 +13,10 @@ public class Tan {
 	Data train;
 	Data test;
 	HashSet<Edge> edges = new HashSet<Edge>();
-	double[][] edge_weights; // = {{1,5,3,4}, {5,1,4,2}, {3,4,1,6}, {4,2,6,1}};
+	double[][] edge_weights;
 	TanUnit root = null;
 	ArrayList<TanUnit> allNodes = new ArrayList<TanUnit>();
+	int numCorrect;
 	
 	public Tan(Data train, Data test){
 		this.train = train;
@@ -28,6 +29,14 @@ public class Tan {
 		//printCPDs();
 	}
 	
+	public int getNumCorrect(){
+		return numCorrect;
+	}
+	
+	public double getPercentageCorrect(){
+		return ((numCorrect + 0.0) / test.getData().size()) * 100;
+	}
+	
 	private void computeCPDs(){
 		for(TanUnit u : allNodes){
 			u.computeProbability();
@@ -37,7 +46,7 @@ public class Tan {
 	private void createTanNetwork(){
 		calculateEdgeWeights();
 		
-		printWeights();
+		//printWeights();
 		//System.out.println("\n");
 		
 		root = determineStructure();
@@ -51,6 +60,7 @@ public class Tan {
 		computeCPDs();
 		
 		printNetwork();
+		System.out.println();
 	}
 	
 	private void testNetwork(){
@@ -65,6 +75,7 @@ public class Tan {
 			}
 		}
 
+		numCorrect = correct;
 		System.out.println("\n" + correct);
 	}
 	
@@ -140,7 +151,7 @@ public class Tan {
 		}
 	}
 	
-	private void printEdges(){
+/*	private void printEdges(){
 		
 		for(int i = 0; i < train.getFeatures().size(); i++){
 			System.out.print(train.getFeatures().get(i).getName() + " ");
@@ -162,7 +173,8 @@ public class Tan {
 			System.out.println();
 		}
 	}
-	
+*/
+	/*
 	private Edge getEdge(Feature ep1, Feature ep2){
 		
 		for(Edge e : edges){
@@ -173,6 +185,7 @@ public class Tan {
 		System.out.println("\n" + ep1.getName() + " -> " + ep2.getName());
 		return null;
 	}
+	*/
 	
 	private void calculateEdgeWeights(){
 		
@@ -380,9 +393,7 @@ public class Tan {
 			// edge direction.
 			nodes[sourceInGraph].addConnection(nodes[endpointOutsideGraph]);
 			nodes[endpointOutsideGraph].addConnection(nodes[sourceInGraph]);
-			
-		//	System.out.println(train.getFeatures().get(sourceInGraph).getName() + " -> " + 
-		//			train.getFeatures().get(endpointOutsideGraph).getName() + " : " + highestWeight);
+
 			
 		}
 		// only return the root since the rest of the graph can be created through the connections

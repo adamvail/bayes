@@ -16,6 +16,11 @@ public class Data {
 		//printData();
 	}
 	
+	public Data(ArrayList<Instance> data, ArrayList<Feature> features){
+		this.data = data;
+		this.features = features;
+	}
+	
 	public void parseFile(String filename){
 		
 		BufferedReader reader = null;

@@ -114,7 +114,6 @@ public class TanUnit {
 			return;
 		}
 		
-		System.out.println();
 		ArrayList<Integer> pointers = new ArrayList<Integer>();
 		boolean done = false;
 		for(int i = 0; i < parents.size(); i++){
@@ -198,10 +197,6 @@ public class TanUnit {
 		double prob = (occurances + 1.0) / (total + feature.getValues().size());
 		return new Probability(fValue, parentValues, parents, prob);
 	}
-	
-//	public double getProbability(String fVal, String cVal){
-//		return cpd[feature.getValues().indexOf(fVal)][classificationFeature.getValues().indexOf(cVal)];
-//	}
 	
 	public void addParent(TanUnit parent){
 		this.parents.add(parent);
