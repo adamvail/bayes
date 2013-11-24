@@ -5,10 +5,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
 
-import tan.Tan;
-
 import naive.NaiveBayes;
-
+import tan.Tan;
 import arff.Data;
 import arff.Instance;
 
@@ -19,6 +17,7 @@ public class LearningCurve {
 	Integer[] mVals = {25, 50, 100};
 	HashMap<Integer, HashSet<Data>> allTrain = new HashMap<Integer, HashSet<Data>>();
 	HashMap<Integer, Double> avgProbabilites = new HashMap<Integer, Double>();
+	HashMap<Integer, ArrayList<Double>> probs = new HashMap<Integer, ArrayList<Double>>();
 	
 	public LearningCurve(Data train, Data test, boolean naive){
 		this.train = train;
@@ -26,18 +25,23 @@ public class LearningCurve {
 		
 		splitData();
 		for(Integer setSize : mVals){
+			ArrayList<Double> pr = new ArrayList<Double>();
 			HashSet<Data> data = allTrain.get(setSize);
 			double accuracy = 0.0;
 			for(Data d : data){
 				if(naive){
 					NaiveBayes nb = new NaiveBayes(d, test);
 					accuracy += nb.getPercentageCorrect();
+					pr.add(nb.getPercentageCorrect());
 				}
 				else {
 					Tan tan = new Tan(d, test);
 					accuracy += tan.getPercentageCorrect();
+					pr.add(tan.getPercentageCorrect());
 				}
 			}
+			
+			probs.put(setSize, pr);
 			double avgAccuracy = accuracy / data.size();
 			avgProbabilites.put(setSize, avgAccuracy);
 		}
@@ -47,6 +51,10 @@ public class LearningCurve {
 		System.out.println();
 		for(Integer s : avgProbabilites.keySet()){
 			System.out.println(s + " : " + avgProbabilites.get(s));
+			for(Double d : probs.get(s)){
+				System.out.println(d);
+			}
+			System.out.println();
 		}
 	}
 	

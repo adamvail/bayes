@@ -6,7 +6,7 @@ import arff.Data;
 
 public class Bayes {
 	
-	static boolean learningCurve = false;
+	static boolean learningCurve = true;
 
 	public static void main(String[] args) {
 		if(args.length != 3){
